@@ -74,14 +74,28 @@ const (
 
 Name|JSON|Type|Doc
 :---|:---|:---|:--
-`Userid`|`userid`|`string`| 外部联系人的userid
+``|``|`FollowUserInfo`| 添加了外部联系人的企业成员
+`Tags`|`tags`|`[]FollowUserTag`| 该成员添加此外部联系人所打标签
+
+### `FollowInfo` 企业成员客户跟进信息，可以参考获取客户详情，但标签信息只会返回企业标签的tag_id，个人标签将不再返回
+
+Name|JSON|Type|Doc
+:---|:---|:---|:--
+``|``|`FollowUserInfo`| 添加了外部联系人的企业成员
+`TagID`|`tag_id`|`[]string`| 该成员添加此外部联系人所打标签
+
+### `FollowUserInfo` 添加了外部联系人的企业成员
+
+Name|JSON|Type|Doc
+:---|:---|:---|:--
+`UserID`|`userid`|`string`| 外部联系人的userid
 `Remark`|`remark`|`string`| 该成员对此外部联系人的备注
 `Description`|`description`|`string`| 该成员对此外部联系人的描述
 `Createtime`|`createtime`|`int`| 该成员添加此外部联系人的时间
-`Tags`|`tags`|`[]FollowUserTag`| 该成员添加此外部联系人所打标签
 `RemarkCorpName`|`remark_corp_name`|`string`| 该成员对此客户备注的企业名称
 `RemarkMobiles`|`remark_mobiles`|`[]string`| 该成员对此客户备注的手机号码，第三方不可获取
 `AddWay`|`add_way`|`FollowUserAddWay`| 该成员添加此客户的来源
+`OperUserID`|`oper_userid`|`string`| 发起添加的userid，如果成员主动添加，为成员的userid；如果是客户主动添加，则为客户的外部联系人userid；如果是内部成员共享/管理员分配，则为对应的成员/管理员userid
 `State`|`state`|`string`| 企业自定义的state参数，用于区分客户具体是通过哪个「联系我」添加，由企业通过[创建「联系我」方式](https://work.weixin.qq.com/api/doc/90000/90135/92114#15645/%E9%85%8D%E7%BD%AE%E5%AE%A2%E6%88%B7%E8%81%94%E7%B3%BB%E3%80%8C%E8%81%94%E7%B3%BB%E6%88%91%E3%80%8D%E6%96%B9%E5%BC%8F)指定
 
 ### `FollowUserTag` 该成员添加此外部联系人所打标签
@@ -91,7 +105,6 @@ Name|JSON|Type|Doc
 `GroupName`|`group_name`|`string`| 该成员添加此外部联系人所打标签的分组名称（标签功能需要企业微信升级到2.7.5及以上版本）
 `TagName`|`tag_name`|`string`| 该成员添加此外部联系人所打标签名称
 `Type`|`type`|`FollowUserTagType`| 该成员添加此外部联系人所打标签类型, 1-企业设置, 2-用户自定义
-
 
 ```go
 // FollowUserTagType 该成员添加此外部联系人所打标签类型
@@ -181,3 +194,38 @@ Name|JSON|Type|Doc
 `ExternalUserID`|`external_userid`|`string`| 外部联系人userid
 `AddTag`|`add_tag`|`[]string`| 要标记的标签列表
 `RemoveTag`|`remove_tag`|`[]string`| 要移除的标签列表
+
+### `ExternalContactUnassignedList` 离职成员的客户列表
+
+Name|JSON|Type|Doc
+:---|:---|:---|:--
+`Info`|`info`|`[]ExternalContactUnassigned`| 离职成员的客户
+`IsLast`|`is_last`|`bool`| 是否是最后一条记录
+`NextCursor`|`next_cursor`|`string`| 分页查询游标,已经查完则返回空("")
+
+```go
+// ExternalContactTransferStatus 客户接替结果状态
+type ExternalContactTransferStatus uint8
+
+const (
+	// ExternalContactTransferStatusSuccess 1-接替完毕
+	ExternalContactTransferStatusSuccess ExternalContactTransferStatus = 1
+	// ExternalContactTransferStatusWait 2-等待接替
+	ExternalContactTransferStatusWait ExternalContactTransferStatus = 2
+	// ExternalContactTransferStatusRefused 3-客户拒绝
+	ExternalContactTransferStatusRefused ExternalContactTransferStatus = 3
+	// ExternalContactTransferStatusExhausted 4-接替成员客户达到上限
+	ExternalContactTransferStatusExhausted ExternalContactTransferStatus = 4
+	// ExternalContactTransferStatusNoData 5-无接替记录
+	ExternalContactTransferStatusNoData ExternalContactTransferStatus = 5
+)
+
+```
+
+### `ExternalContactGroupChatTransferFailed` 离职成员的群再分配失败
+
+Name|JSON|Type|Doc
+:---|:---|:---|:--
+`ChatID`|`chat_id`|`string`| 没能成功继承的群ID
+`ErrCode`|`errcode`|`int`| 没能成功继承的群，错误码
+`ErrMsg`|`errmsg`|`string`| 没能成功继承的群，错误描述

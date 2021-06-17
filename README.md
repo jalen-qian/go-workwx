@@ -60,11 +60,13 @@ in at least 2 of Qiniu's internal systems.
 ## Supported APIs
 
 * [x] 通讯录管理 (**部分支持**，见下)
-* [ ] 外部联系人管理
+* [ ] 客户联系
 * [ ] 应用管理
 * [x] 消息发送 (除修改群聊会话外全部支持)
 * [x] 消息接收 (**接口尚不稳定，极有可能做出不兼容改动，先不要用**)
 * [x] 素材管理 (**支持上传**, 见下)
+* [ ] OA
+* [ ] 会话内容存档
 * [x] 企业微信登录接口 (code2Session)
 
 <details>
@@ -108,17 +110,22 @@ in at least 2 of Qiniu's internal systems.
 </details>
 
 <details>
-<summary>外部联系人管理 API</summary>
+<summary>客户联系 API</summary>
 
-* [ ] 离职成员的外部联系人再分配
 * [x] 成员对外信息
 * [x] 客户管理
     - [x] 获取客户列表
     - [x] 获取客户详情
+    - [x] 批量获取客户详情
     - [x] 修改客户备注信息
 * [x] 客户标签管理
    - [x] 管理企业标签
    - [x] 编辑客户企业标签
+* [x] 客户分配
+   - [x] 获取离职成员列表
+   - [x] 分配在职或离职成员的客户
+   - [x] 查询客户接替结果
+   - [x] 分配离职成员的客户群
 * [x] 变更回调通知
     - [x] 添加企业客户事件
     - [x] 编辑企业客户事件
@@ -171,6 +178,7 @@ in at least 2 of Qiniu's internal systems.
 * [x] 图文消息
 * [x] 图文消息（mpnews）
 * [x] markdown消息
+* [x] 任务卡片消息
 
 </details>
 
@@ -181,6 +189,30 @@ in at least 2 of Qiniu's internal systems.
 * [x] 上传永久图片
 * [ ] 获取临时素材
 * [ ] 获取高清语音素材
+
+</details>
+
+<details>
+<summary>OA API</summary>
+
+* [ ] 审批
+    - [x] 获取审批模板详情
+    - [x] 提交审批申请
+    - [x] 审批申请状态变化回调通知
+    - [x] 批量获取审批单号
+    - [x] 获取审批申请详情
+    - [ ] 获取企业假期管理配置
+    - [ ] 修改成员假期余额
+
+</details>
+
+<details>
+<summary>会话内容存档 API</summary>
+
+* [x] 获取会话内容存档开启成员列表
+* [x] 获取会话同意情况
+* [ ] 客户同意进行聊天内容存档事件回调
+* [x] 获取会话内容存档内部群信息
 
 </details>
 

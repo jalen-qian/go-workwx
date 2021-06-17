@@ -156,6 +156,20 @@ func (c *WorkwxApp) execExternalContactGet(req reqExternalContactGet) (respExter
 	return resp, nil
 }
 
+// execExternalContactBatchList 批量获取客户详情
+func (c *WorkwxApp) execExternalContactBatchList(req reqExternalContactBatchList) (respExternalContactBatchList, error) {
+	var resp respExternalContactBatchList
+	err := c.executeQyapiJSONPost("/cgi-bin/externalcontact/batch/get_by_user", req, &resp, true)
+	if err != nil {
+		return respExternalContactBatchList{}, err
+	}
+	if bizErr := resp.TryIntoErr(); bizErr != nil {
+		return respExternalContactBatchList{}, bizErr
+	}
+
+	return resp, nil
+}
+
 // execExternalContactRemark 修改客户备注信息
 func (c *WorkwxApp) execExternalContactRemark(req reqExternalContactRemark) (respExternalContactRemark, error) {
 	var resp respExternalContactRemark
@@ -240,6 +254,62 @@ func (c *WorkwxApp) execExternalContactMarkTag(req reqExternalContactMarkTag) (r
 	return resp, nil
 }
 
+// execListUnassignedExternalContact 获取离职成员的客户列表
+func (c *WorkwxApp) execListUnassignedExternalContact(req reqListUnassignedExternalContact) (respListUnassignedExternalContact, error) {
+	var resp respListUnassignedExternalContact
+	err := c.executeQyapiJSONPost("/cgi-bin/externalcontact/get_unassigned_list", req, &resp, true)
+	if err != nil {
+		return respListUnassignedExternalContact{}, err
+	}
+	if bizErr := resp.TryIntoErr(); bizErr != nil {
+		return respListUnassignedExternalContact{}, bizErr
+	}
+
+	return resp, nil
+}
+
+// execTransferExternalContact 分配成员的客户
+func (c *WorkwxApp) execTransferExternalContact(req reqTransferExternalContact) (respTransferExternalContact, error) {
+	var resp respTransferExternalContact
+	err := c.executeQyapiJSONPost("/cgi-bin/externalcontact/transfer", req, &resp, true)
+	if err != nil {
+		return respTransferExternalContact{}, err
+	}
+	if bizErr := resp.TryIntoErr(); bizErr != nil {
+		return respTransferExternalContact{}, bizErr
+	}
+
+	return resp, nil
+}
+
+// execGetTransferExternalContactResult 查询客户接替结果
+func (c *WorkwxApp) execGetTransferExternalContactResult(req reqGetTransferExternalContactResult) (respGetTransferExternalContactResult, error) {
+	var resp respGetTransferExternalContactResult
+	err := c.executeQyapiJSONPost("/cgi-bin/externalcontact/get_transfer_result", req, &resp, true)
+	if err != nil {
+		return respGetTransferExternalContactResult{}, err
+	}
+	if bizErr := resp.TryIntoErr(); bizErr != nil {
+		return respGetTransferExternalContactResult{}, bizErr
+	}
+
+	return resp, nil
+}
+
+// execTransferGroupChatExternalContact 离职成员的群再分配
+func (c *WorkwxApp) execTransferGroupChatExternalContact(req reqTransferGroupChatExternalContact) (respTransferGroupChatExternalContact, error) {
+	var resp respTransferGroupChatExternalContact
+	err := c.executeQyapiJSONPost("/cgi-bin/externalcontact/groupchat/transfer", req, &resp, true)
+	if err != nil {
+		return respTransferGroupChatExternalContact{}, err
+	}
+	if bizErr := resp.TryIntoErr(); bizErr != nil {
+		return respTransferGroupChatExternalContact{}, bizErr
+	}
+
+	return resp, nil
+}
+
 // execAppchatCreate 创建群聊会话
 func (c *WorkwxApp) execAppchatCreate(req reqAppchatCreate) (respAppchatCreate, error) {
 	var resp respAppchatCreate
@@ -319,6 +389,118 @@ func (c *WorkwxApp) execMediaUploadImg(req reqMediaUploadImg) (respMediaUploadIm
 	}
 	if bizErr := resp.TryIntoErr(); bizErr != nil {
 		return respMediaUploadImg{}, bizErr
+	}
+
+	return resp, nil
+}
+
+// execOAGetTemplateDetail 获取审批模板详情
+func (c *WorkwxApp) execOAGetTemplateDetail(req reqOAGetTemplateDetail) (respOAGetTemplateDetail, error) {
+	var resp respOAGetTemplateDetail
+	err := c.executeQyapiJSONPost("/cgi-bin/oa/gettemplatedetail", req, &resp, true)
+	if err != nil {
+		return respOAGetTemplateDetail{}, err
+	}
+	if bizErr := resp.TryIntoErr(); bizErr != nil {
+		return respOAGetTemplateDetail{}, bizErr
+	}
+
+	return resp, nil
+}
+
+// execOAApplyEvent 提交审批申请
+func (c *WorkwxApp) execOAApplyEvent(req reqOAApplyEvent) (respOAApplyEvent, error) {
+	var resp respOAApplyEvent
+	err := c.executeQyapiJSONPost("/cgi-bin/oa/applyevent", req, &resp, true)
+	if err != nil {
+		return respOAApplyEvent{}, err
+	}
+	if bizErr := resp.TryIntoErr(); bizErr != nil {
+		return respOAApplyEvent{}, bizErr
+	}
+
+	return resp, nil
+}
+
+// execOAGetApprovalInfo 批量获取审批单号
+func (c *WorkwxApp) execOAGetApprovalInfo(req reqOAGetApprovalInfo) (respOAGetApprovalInfo, error) {
+	var resp respOAGetApprovalInfo
+	err := c.executeQyapiJSONPost("/cgi-bin/oa/getapprovalinfo", req, &resp, true)
+	if err != nil {
+		return respOAGetApprovalInfo{}, err
+	}
+	if bizErr := resp.TryIntoErr(); bizErr != nil {
+		return respOAGetApprovalInfo{}, bizErr
+	}
+
+	return resp, nil
+}
+
+// execOAGetApprovalDetail 获取审批申请详情
+func (c *WorkwxApp) execOAGetApprovalDetail(req reqOAGetApprovalDetail) (respOAGetApprovalDetail, error) {
+	var resp respOAGetApprovalDetail
+	err := c.executeQyapiJSONPost("/cgi-bin/oa/getapprovaldetail", req, &resp, true)
+	if err != nil {
+		return respOAGetApprovalDetail{}, err
+	}
+	if bizErr := resp.TryIntoErr(); bizErr != nil {
+		return respOAGetApprovalDetail{}, bizErr
+	}
+
+	return resp, nil
+}
+
+// execMsgAuditListPermitUser 获取会话内容存档开启成员列表
+func (c *WorkwxApp) execMsgAuditListPermitUser(req reqMsgAuditListPermitUser) (respMsgAuditListPermitUser, error) {
+	var resp respMsgAuditListPermitUser
+	err := c.executeQyapiJSONPost("/cgi-bin/msgaudit/get_permit_user_list", req, &resp, true)
+	if err != nil {
+		return respMsgAuditListPermitUser{}, err
+	}
+	if bizErr := resp.TryIntoErr(); bizErr != nil {
+		return respMsgAuditListPermitUser{}, bizErr
+	}
+
+	return resp, nil
+}
+
+// execMsgAuditCheckSingleAgree 获取会话同意情况（单聊）
+func (c *WorkwxApp) execMsgAuditCheckSingleAgree(req reqMsgAuditCheckSingleAgree) (respMsgAuditCheckSingleAgree, error) {
+	var resp respMsgAuditCheckSingleAgree
+	err := c.executeQyapiJSONPost("/cgi-bin/msgaudit/check_single_agree", req, &resp, true)
+	if err != nil {
+		return respMsgAuditCheckSingleAgree{}, err
+	}
+	if bizErr := resp.TryIntoErr(); bizErr != nil {
+		return respMsgAuditCheckSingleAgree{}, bizErr
+	}
+
+	return resp, nil
+}
+
+// execMsgAuditCheckRoomAgree 获取会话同意情况（群聊）
+func (c *WorkwxApp) execMsgAuditCheckRoomAgree(req reqMsgAuditCheckRoomAgree) (respMsgAuditCheckRoomAgree, error) {
+	var resp respMsgAuditCheckRoomAgree
+	err := c.executeQyapiJSONPost("/cgi-bin/msgaudit/check_room_agree", req, &resp, true)
+	if err != nil {
+		return respMsgAuditCheckRoomAgree{}, err
+	}
+	if bizErr := resp.TryIntoErr(); bizErr != nil {
+		return respMsgAuditCheckRoomAgree{}, bizErr
+	}
+
+	return resp, nil
+}
+
+// execMsgAuditGetGroupChat 获取会话内容存档内部群信息
+func (c *WorkwxApp) execMsgAuditGetGroupChat(req reqMsgAuditGetGroupChat) (respMsgAuditGetGroupChat, error) {
+	var resp respMsgAuditGetGroupChat
+	err := c.executeQyapiJSONPost("/cgi-bin/msgaudit/groupchat/get", req, &resp, true)
+	if err != nil {
+		return respMsgAuditGetGroupChat{}, err
+	}
+	if bizErr := resp.TryIntoErr(); bizErr != nil {
+		return respMsgAuditGetGroupChat{}, bizErr
 	}
 
 	return resp, nil

@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type reqAccessToken struct {
@@ -386,9 +387,49 @@ type respExternalContactGet struct {
 	ExternalContactInfo
 }
 
+// ExternalContactInfo 外部联系人信息
 type ExternalContactInfo struct {
 	ExternalContact ExternalContact `json:"external_contact"`
 	FollowUser      []FollowUser    `json:"follow_user"`
+}
+
+// ExternalContactBatchInfo 外部联系人信息
+type ExternalContactBatchInfo struct {
+	ExternalContact ExternalContact `json:"external_contact"`
+	FollowInfo      FollowInfo      `json:"follow_info"`
+}
+
+// BatchListExternalContactsResp 外部联系人信息
+type BatchListExternalContactsResp struct {
+	Result     []ExternalContactBatchInfo
+	NextCursor string
+}
+
+// reqExternalContactBatchList 批量获取客户详情
+type reqExternalContactBatchList struct {
+	UserID string `json:"userid"`
+	Cursor string `json:"cursor"`
+	Limit  int    `json:"limit"`
+}
+
+var _ bodyer = reqExternalContactBatchList{}
+
+func (x reqExternalContactBatchList) intoBody() ([]byte, error) {
+	result, err := json.Marshal(x)
+	if err != nil {
+		// should never happen unless OOM or similar bad things
+		// TODO: error_chain
+		return nil, err
+	}
+
+	return result, nil
+}
+
+// respExternalContactBatchList 批量获取客户详情
+type respExternalContactBatchList struct {
+	respCommon
+	NextCursor          string                     `json:"next_cursor"`
+	ExternalContactList []ExternalContactBatchInfo `json:"external_contact_list"`
 }
 
 // reqExternalContactRemark 获取客户详情
@@ -585,4 +626,369 @@ type JSCodeSession struct {
 	CorpID     string `json:"corpid"`
 	UserID     string `json:"userid"`
 	SessionKey string `json:"session_key"`
+}
+
+type reqMsgAuditListPermitUser struct {
+	MsgAuditEdition MsgAuditEdition `json:"type"`
+}
+
+var _ bodyer = reqMsgAuditListPermitUser{}
+
+func (x reqMsgAuditListPermitUser) intoBody() ([]byte, error) {
+	result, err := json.Marshal(x)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+type respMsgAuditListPermitUser struct {
+	respCommon
+	IDs []string `json:"ids"`
+}
+
+type reqMsgAuditCheckSingleAgree struct {
+	Infos []CheckMsgAuditSingleAgreeUserInfo `json:"info"`
+}
+
+var _ bodyer = reqMsgAuditCheckSingleAgree{}
+
+func (x reqMsgAuditCheckSingleAgree) intoBody() ([]byte, error) {
+	result, err := json.Marshal(x)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+type respMsgAuditCheckSingleAgree struct {
+	respCommon
+	AgreeInfo []struct {
+		UserID           string              `json:"userid"`
+		ExternalOpenID   string              `json:"exteranalopenid"`
+		AgreeStatus      MsgAuditAgreeStatus `json:"agree_status"`
+		StatusChangeTime int                 `json:"status_change_time"`
+	} `json:"agreeinfo"`
+}
+
+func (x respMsgAuditCheckSingleAgree) intoCheckSingleAgreeInfoList() (resp []CheckMsgAuditSingleAgreeInfo) {
+	for _, agreeInfo := range x.AgreeInfo {
+		resp = append(resp, CheckMsgAuditSingleAgreeInfo{
+			CheckMsgAuditSingleAgreeUserInfo: CheckMsgAuditSingleAgreeUserInfo{
+				UserID:         agreeInfo.UserID,
+				ExternalOpenID: agreeInfo.ExternalOpenID,
+			},
+			AgreeStatus:      agreeInfo.AgreeStatus,
+			StatusChangeTime: time.Unix(int64(agreeInfo.StatusChangeTime), 0),
+		})
+	}
+	return resp
+}
+
+type reqMsgAuditCheckRoomAgree struct {
+	RoomID string `json:"roomid"`
+}
+
+var _ bodyer = reqMsgAuditCheckRoomAgree{}
+
+func (x reqMsgAuditCheckRoomAgree) intoBody() ([]byte, error) {
+	result, err := json.Marshal(x)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+type respMsgAuditCheckRoomAgree struct {
+	respCommon
+	AgreeInfo []struct {
+		StatusChangeTime int                 `json:"status_change_time"`
+		AgreeStatus      MsgAuditAgreeStatus `json:"agree_status"`
+		ExternalOpenID   string              `json:"exteranalopenid"`
+	} `json:"agreeinfo"`
+}
+
+func (x respMsgAuditCheckRoomAgree) intoCheckRoomAgreeInfoList() (resp []CheckMsgAuditRoomAgreeInfo) {
+	for _, agreeInfo := range x.AgreeInfo {
+		resp = append(resp, CheckMsgAuditRoomAgreeInfo{
+			StatusChangeTime: time.Unix(int64(agreeInfo.StatusChangeTime), 0),
+			AgreeStatus:      agreeInfo.AgreeStatus,
+			ExternalOpenID:   agreeInfo.ExternalOpenID,
+		})
+	}
+	return resp
+}
+
+type reqMsgAuditGetGroupChat struct {
+	RoomID string `json:"roomid"`
+}
+
+var _ bodyer = reqMsgAuditGetGroupChat{}
+
+func (x reqMsgAuditGetGroupChat) intoBody() ([]byte, error) {
+	result, err := json.Marshal(x)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+type respMsgAuditGetGroupChat struct {
+	respCommon
+	Members []struct {
+		MemberID int `json:"memberid"`
+		JoinTime int `json:"jointime"`
+	} `json:"members"`
+	RoomName       string `json:"roomname"`
+	Creator        string `json:"creator"`
+	RoomCreateTime int    `json:"room_create_time"`
+	Notice         string `json:"notice"`
+}
+
+func (x respMsgAuditGetGroupChat) intoGroupChat() (resp MsgAuditGroupChat) {
+	resp.Creator = x.Creator
+	resp.Notice = x.Notice
+	resp.RoomName = x.RoomName
+	resp.RoomCreateTime = time.Unix(int64(x.RoomCreateTime), 0)
+	for _, member := range x.Members {
+		resp.Members = append(resp.Members, MsgAuditGroupChatMember{
+			MemberID: member.MemberID,
+			JoinTime: time.Unix(int64(member.JoinTime), 0),
+		})
+	}
+	return resp
+}
+
+type reqListUnassignedExternalContact struct {
+	// PageID 分页查询，要查询页号，从0开始
+	PageID uint32 `json:"page_id"`
+	// PageSize 每次返回的最大记录数，默认为1000，最大值为1000
+	PageSize uint32 `json:"page_size"`
+	// Cursor 分页查询游标，字符串类型，适用于数据量较大的情况，如果使用该参数则无需填写page_id，该参数由上一次调用返回
+	Cursor string `json:"cursor"`
+}
+
+var _ bodyer = reqListUnassignedExternalContact{}
+
+func (x reqListUnassignedExternalContact) intoBody() ([]byte, error) {
+	result, err := json.Marshal(x)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+type respListUnassignedExternalContact struct {
+	respCommon
+	Info []struct {
+		HandoverUserid string `json:"handover_userid"`
+		ExternalUserid string `json:"external_userid"`
+		DemissionTime  int    `json:"dimission_time"`
+	} `json:"info"`
+	IsLast     bool   `json:"is_last"`
+	NextCursor string `json:"next_cursor"`
+}
+
+func (x respListUnassignedExternalContact) intoExternalContactUnassignedList() (resp ExternalContactUnassignedList) {
+	list := make([]ExternalContactUnassigned, 0, len(x.Info))
+	for _, info := range x.Info {
+		list = append(list, ExternalContactUnassigned{
+			HandoverUserID: info.HandoverUserid,
+			ExternalUserID: info.ExternalUserid,
+			DemissionTime:  time.Unix(int64(info.DemissionTime), 0),
+		})
+	}
+	resp.Info = list
+	resp.IsLast = x.IsLast
+	resp.NextCursor = x.NextCursor
+	return resp
+}
+
+type reqTransferExternalContact struct {
+	// ExternalUserID 外部联系人的userid，注意不是企业成员的帐号
+	ExternalUserID string `json:"external_userid"`
+	// HandoverUserID 原跟进成员的userid
+	HandoverUserID string `json:"handover_userid"`
+	// TakeoverUserID 接替成员的userid
+	TakeoverUserID string `json:"takeover_userid"`
+	// TransferSuccessMsg 转移成功后发给客户的消息，最多200个字符，不填则使用默认文案，目前只对在职成员分配客户的情况生效
+	TransferSuccessMsg string `json:"transfer_success_msg"`
+}
+
+var _ bodyer = reqTransferExternalContact{}
+
+func (x reqTransferExternalContact) intoBody() ([]byte, error) {
+	result, err := json.Marshal(x)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+type respTransferExternalContact struct {
+	respCommon
+}
+
+type reqGetTransferExternalContactResult struct {
+	// ExternalUserID 外部联系人的userid，注意不是企业成员的帐号
+	ExternalUserID string `json:"external_userid"`
+	// HandoverUserID 原跟进成员的userid
+	HandoverUserID string `json:"handover_userid"`
+	// TakeoverUserID 接替成员的userid
+	TakeoverUserID string `json:"takeover_userid"`
+}
+
+var _ bodyer = reqGetTransferExternalContactResult{}
+
+func (x reqGetTransferExternalContactResult) intoBody() ([]byte, error) {
+	result, err := json.Marshal(x)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+type respGetTransferExternalContactResult struct {
+	respCommon
+	Status       uint8 `json:"status"`
+	TakeoverTime int   `json:"takeover_time"`
+}
+
+func (x respGetTransferExternalContactResult) intoExternalContactTransferResult() ExternalContactTransferResult {
+	return ExternalContactTransferResult{
+		Status:       ExternalContactTransferStatus(x.Status),
+		TakeoverTime: time.Unix(int64(x.TakeoverTime), 0),
+	}
+}
+
+type reqTransferGroupChatExternalContact struct {
+	// ChatIDList 需要转群主的客户群ID列表。取值范围： 1 ~ 100
+	ChatIDList []string `json:"chat_id_list"`
+	// NewOwner 新群主ID
+	NewOwner string `json:"new_owner"`
+}
+
+var _ bodyer = reqTransferGroupChatExternalContact{}
+
+func (x reqTransferGroupChatExternalContact) intoBody() ([]byte, error) {
+	result, err := json.Marshal(x)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+type respTransferGroupChatExternalContact struct {
+	respCommon
+	FailedChatList []ExternalContactGroupChatTransferFailed `json:"failed_chat_list"`
+}
+
+type reqOAGetTemplateDetail struct {
+	TemplateID string `json:"template_id"`
+}
+
+var _ bodyer = reqOAGetTemplateDetail{}
+
+func (x reqOAGetTemplateDetail) intoBody() ([]byte, error) {
+	result, err := json.Marshal(x)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+type respOAGetTemplateDetail struct {
+	respCommon
+	OATemplateDetail
+}
+
+type reqOAApplyEvent struct {
+	OAApplyEvent
+}
+
+var _ bodyer = reqOAApplyEvent{}
+
+func (x reqOAApplyEvent) intoBody() ([]byte, error) {
+	result, err := json.Marshal(x)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+type respOAApplyEvent struct {
+	respCommon
+	// SpNo 表单提交成功后，返回的表单编号
+	SpNo string `json:"sp_no"`
+}
+
+type reqOAGetApprovalInfo struct {
+	StartTime string                 `json:"starttime"`
+	EndTime   string                 `json:"endtime"`
+	Cursor    int                    `json:"cursor"`
+	Size      uint32                 `json:"size"`
+	Filters   []OAApprovalInfoFilter `json:"filters"`
+}
+
+var _ bodyer = reqOAGetApprovalInfo{}
+
+func (x reqOAGetApprovalInfo) intoBody() ([]byte, error) {
+	result, err := json.Marshal(x)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+type respOAGetApprovalInfo struct {
+	respCommon
+	// SpNoList 审批单号列表，包含满足条件的审批申请
+	SpNoList []string `json:"sp_no_list"`
+}
+
+type reqOAGetApprovalDetail struct {
+	// SpNo 审批单编号。
+	SpNo string `json:"sp_no"`
+}
+
+var _ bodyer = reqOAGetApprovalDetail{}
+
+func (x reqOAGetApprovalDetail) intoBody() ([]byte, error) {
+	result, err := json.Marshal(x)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+type respOAGetApprovalDetail struct {
+	respCommon
+	// Info 审批申请详情
+	Info OAApprovalDetail `json:"info"`
+}
+
+// TaskCardBtn 任务卡片消息按钮
+type TaskCardBtn struct {
+	// Key 按钮key值，用户点击后，会产生任务卡片回调事件，回调事件会带上该key值，只能由数字、字母和“_-@”组成，最长支持128字节
+	Key string `json:"key"`
+	// Name 按钮名称
+	Name string `json:"name"`
+	// ReplaceName 点击按钮后显示的名称，默认为“已处理”
+	ReplaceName string `json:"replace_name"`
+	// Color 按钮字体颜色，可选“red”或者“blue”,默认为“blue”
+	Color string `json:"color"`
+	// IsBold 按钮字体是否加粗，默认false
+	IsBold bool `json:"is_bold"`
 }
